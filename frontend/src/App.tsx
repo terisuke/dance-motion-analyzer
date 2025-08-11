@@ -16,13 +16,21 @@ const parseGeminiFeedback = (text: string): ParsedFeedback => {
   const scoreMatch = text.match(/【スコア】\s*(\d+)/);
   const goodPointMatch = text.match(/【良い点】\s*([\s\S]*?)(?=\n【|$)/);
   const improvementPointMatch = text.match(/【改善点】\s*([\s\S]*?)(?=\n【|$)/);
-  const adviceMatch = text.match(/【具体的アドバイス】\s*([\s\S]*?)(?=\n【|$)/);
+  const adviceMatch = text.match(/【アドバイス】\s*([\s\S]*?)(?=\n【|$)/);
+
+  // Remove bullet points and get the first line
+  const extractFirstPoint = (text: string | null): string => {
+    if (!text) return "";
+    const cleaned = text.replace(/^[-・•]\s*/gm, "").trim();
+    const lines = cleaned.split('\n').filter(line => line.trim());
+    return lines[0] || "";
+  };
 
   return {
     score: scoreMatch ? parseInt(scoreMatch[1], 10) : null,
-    goodPoint: goodPointMatch ? goodPointMatch[1].trim() : "良い点が見つかりませんでした。",
-    improvementPoint: improvementPointMatch ? improvementPointMatch[1].trim() : "改善点が見つかりませんでした。",
-    advice: adviceMatch ? adviceMatch[1].trim() : "具体的なアドバイスが見つかりませんでした。",
+    goodPoint: goodPointMatch ? extractFirstPoint(goodPointMatch[1]) : "良い動き！",
+    improvementPoint: improvementPointMatch ? extractFirstPoint(improvementPointMatch[1]) : "もう少し大きく",
+    advice: adviceMatch ? extractFirstPoint(adviceMatch[1]) : "リズムを意識して",
     raw: text,
   };
 };
@@ -179,26 +187,38 @@ function App() {
                        <span className="ml-3">分析中...</span>
                     </div>
                 ) : feedback ? (
-                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="flex flex-col items-center justify-center bg-gray-100 dark:bg-slate-800 rounded-xl p-6 text-center border border-gray-200 dark:border-slate-700">
-                            <h4 className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-1">シンクロ率</h4>
-                            <div className="text-7xl font-bold bg-gradient-to-br from-pink-500 to-violet-500 bg-clip-text text-transparent my-2">
+                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div className="flex flex-col items-center justify-center bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-2xl p-8 text-center border-2 border-purple-300 dark:border-purple-700">
+                            <h4 className="text-2xl font-bold text-gray-700 dark:text-gray-300 mb-2">スコア</h4>
+                            <div className={`text-8xl lg:text-9xl font-black my-4 ${
+                                feedback.score !== null && feedback.score >= 80 ? 'text-green-500' :
+                                feedback.score !== null && feedback.score >= 60 ? 'text-blue-500' :
+                                feedback.score !== null && feedback.score >= 40 ? 'text-yellow-500' :
+                                feedback.score !== null && feedback.score >= 20 ? 'text-orange-500' :
+                                'text-red-500'
+                            }`}>
                                 {feedback.score ?? '--'}
                             </div>
-                            <div className="text-gray-500 dark:text-gray-400">/ 100</div>
+                            <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">点</div>
                         </div>
-                        <div className="md:col-span-2 space-y-4">
-                            <div>
-                                <h5 className="font-semibold text-lg flex items-center gap-2 text-green-600 dark:text-green-400"><CheckCircleIcon className="w-6 h-6"/>良い点</h5>
-                                <p className="mt-1 text-gray-600 dark:text-gray-300 pl-8">{feedback.goodPoint}</p>
+                        <div className="space-y-6 flex flex-col justify-center">
+                            <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4 border-2 border-green-300 dark:border-green-700">
+                                <h5 className="font-black text-2xl flex items-center gap-3 text-green-700 dark:text-green-400 mb-2">
+                                    <CheckCircleIcon className="w-8 h-8"/>良い点
+                                </h5>
+                                <p className="text-2xl lg:text-3xl font-bold text-gray-800 dark:text-gray-200 ml-11">{feedback.goodPoint}</p>
                             </div>
-                            <div>
-                                <h5 className="font-semibold text-lg flex items-center gap-2 text-amber-600 dark:text-amber-400"><XCircleIcon className="w-6 h-6"/>改善点</h5>
-                                <p className="mt-1 text-gray-600 dark:text-gray-300 pl-8">{feedback.improvementPoint}</p>
+                            <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 border-2 border-amber-300 dark:border-amber-700">
+                                <h5 className="font-black text-2xl flex items-center gap-3 text-amber-700 dark:text-amber-400 mb-2">
+                                    <XCircleIcon className="w-8 h-8"/>改善点
+                                </h5>
+                                <p className="text-2xl lg:text-3xl font-bold text-gray-800 dark:text-gray-200 ml-11">{feedback.improvementPoint}</p>
                             </div>
-                            <div>
-                                <h5 className="font-semibold text-lg flex items-center gap-2 text-blue-600 dark:text-blue-400"><SparklesIcon className="w-6 h-6"/>アドバイス</h5>
-                                <p className="mt-1 text-gray-600 dark:text-gray-300 pl-8">{feedback.advice}</p>
+                            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border-2 border-blue-300 dark:border-blue-700">
+                                <h5 className="font-black text-2xl flex items-center gap-3 text-blue-700 dark:text-blue-400 mb-2">
+                                    <SparklesIcon className="w-8 h-8"/>アドバイス
+                                </h5>
+                                <p className="text-2xl lg:text-3xl font-bold text-gray-800 dark:text-gray-200 ml-11">{feedback.advice}</p>
                             </div>
                         </div>
                    </div>

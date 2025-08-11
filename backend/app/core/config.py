@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     
     # Database
-    DATABASE_URL: str = "postgresql+asyncpg://user:pass@localhost/dance_analyzer"
+    DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/dance_analyzer"
     
     # Redis
     REDIS_URL: str = "redis://localhost:6379"

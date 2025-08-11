@@ -8,7 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import logging
 
-from app.api import auth, analysis, users
+from app.api.auth import router as auth_router
+from app.api.analysis import router as analysis_router
+from app.api.users import router as users_router
 from app.core.config import settings
 
 # ロギング設定
@@ -42,9 +44,9 @@ app.add_middleware(
 )
 
 # ルーター登録
-app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
-app.include_router(analysis.router, prefix="/api/v1/analysis", tags=["Analysis"])
-app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
+app.include_router(auth_router, prefix="/api/v1/auth", tags=["Authentication"])
+app.include_router(analysis_router, prefix="/api/v1/analysis", tags=["Analysis"])
+app.include_router(users_router, prefix="/api/v1/users", tags=["Users"])
 
 @app.get("/")
 async def root():
