@@ -56,7 +56,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    command: celery -A app.celery worker --loglevel=info
+    command: celery -A app.celery.celery_app worker --loglevel=info
     environment:
       - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@db:5432/dance_analyzer}
       - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
@@ -71,7 +71,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    command: celery -A app.celery flower
+    command: celery -A app.celery.celery_app flower
     ports:
       - "5555:5555"
     environment:
