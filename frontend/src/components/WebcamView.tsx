@@ -87,7 +87,10 @@ const WebcamView = forwardRef<WebcamViewHandles, {}>((_props, ref) => {
       if (results.landmarks) {
         for (const landmark of results.landmarks) {
           drawingUtils.drawLandmarks(landmark, {
-            radius: (data) => lerp(5, 1, (data.from!.z + 1) / 2),
+            radius: (data) => {
+              const normalizedZ = Math.max(0, Math.min(1, (data.from!.z + 1) / 2));
+              return Math.max(1, lerp(5, 1, normalizedZ));
+            },
             color: '#a78bfa', // violet-400
             fillColor: '#a78bfa'
           });
