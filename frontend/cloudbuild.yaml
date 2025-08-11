@@ -1,0 +1,18 @@
+steps:
+  # フロントエンドのDockerイメージをビルド
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/aipartner-426616/dance-frontend'
+      - '--build-arg'
+      - 'VITE_CLERK_PUBLISHABLE_KEY=pk_test_cGlja2VkLW95c3Rlci0zMC5jbGVyay5hY2NvdW50cy5kZXYk'
+      - '--build-arg'
+      - 'VITE_API_URL=https://dance-backend-xxxxx-an.a.run.app'
+      - '--build-arg'
+      - 'VITE_GEMINI_API_KEY=AIzaSyD2mRqSsY-DMurxjGu8AWt7EZgmy_SzKEs'
+      - '-f'
+      - 'Dockerfile.production'
+      - '.'
+images:
+  - 'gcr.io/aipartner-426616/dance-frontend'
