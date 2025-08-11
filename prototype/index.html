@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dance Motion Analyzer - Gemini AI Coach</title>
+    
+    <!-- MediaPipe -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1em;
+        }
+        
+        .url-input-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        
+        .url-input-wrapper {
+            display: flex;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            padding: 5px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .url-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            background: transparent;
+            color: white;
+            font-size: 1em;
+            outline: none;
+        }
+        
+        .url-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .url-submit {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #ff006e 0%, #8338ec 100%);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .url-submit:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(131, 56, 236, 0.4);
+        }
+        
+        .container {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .video-section {
+            flex: 1;
+        }
+        
+        .video-container {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .video-title {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            background: #000;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        
+        .video-wrapper iframe,
+        .video-wrapper video,
+        .video-wrapper canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #userVideo {
+            transform: scaleX(-1); /* Mirror effect */
+        }
+        
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+        
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #ff006e 0%, #8338ec 100%);
+        }
+        
+        .btn-primary:hover {
+            box-shadow: 0 10px 30px rgba(131, 56, 236, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .score-container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        
+        .score-panel {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 30px;
+        }
+        
+        .score-display {
+            text-align: center;
+        }
+        
+        .score-value {
+            font-size: 4em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ff006e 0%, #8338ec 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+        
+        .score-label {
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        
+        .feedback-section {
+            flex: 1;
+        }
+        
+        .feedback-title {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .feedback-content {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            min-height: 120px;
+            line-height: 1.6;
+        }
+        
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.1);
+            margin-top: 15px;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .api-key-notice {
+            background: rgba(255, 165, 0, 0.2);
+            border: 1px solid rgba(255, 165, 0, 0.5);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px;
+            text-align: center;
+        }
+        
+        .api-key-input {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            width: 300px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .score-panel {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🕺 Dance Motion Analyzer</h1>
+        <p>Gemini AIがあなたのダンスをリアルタイムコーチング</p>
+    </div>
+    
+    <!-- YouTube URL入力 -->
+    <div class="url-input-container">
+        <div class="url-input-wrapper">
+            <input 
+                type="text" 
+                id="youtubeUrl" 
+                class="url-input" 
+                placeholder="YouTube URLを入力（例: https://youtube.com/watch?v=...）"
+            >
+            <button class="url-submit" onclick="loadYouTubeVideo()">
+                動画を設定
+            </button>
+        </div>
+    </div>
+    
+    <!-- Gemini APIキー入力（デモ用） -->
+    <div class="api-key-notice" id="apiKeyNotice">
+        <p>⚠️ Gemini APIキーが必要です</p>
+        <input 
+            type="password" 
+            id="apiKeyInput" 
+            class="api-key-input" 
+            placeholder="APIキーを入力"
+        >
+        <button class="btn btn-primary" onclick="setApiKey()" style="margin-left: 10px;">
+            設定
+        </button>
+        <p style="margin-top: 10px; font-size: 0.9em; opacity: 0.7;">
+            <a href="https://aistudio.google.com/" target="_blank" style="color: white;">
+                APIキーを取得 →
+            </a>
+        </p>
+    </div>
+    
+    <div class="container">
+        <!-- YouTube動画 -->
+        <div class="video-section">
+            <div class="video-container">
+                <div class="video-title">
+                    📹 お手本動画
+                </div>
+                <div class="video-wrapper">
+                    <div id="youtubePlayer" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.5);">
+                        YouTube URLを入力してください
+                    </div>
+                </div>
+                <div class="controls">
+                    <button class="btn" onclick="playPauseVideo()">再生/一時停止</button>
+                    <button class="btn" onclick="setPlaybackSpeed(0.5)">0.5倍速</button>
+                    <button class="btn" onclick="setPlaybackSpeed(1)">通常速度</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Webカメラ -->
+        <div class="video-section">
+            <div class="video-container">
+                <div class="video-title">
+                    🎥 あなたの動き
+                </div>
+                <div class="video-wrapper">
+                    <video id="userVideo" autoplay playsinline muted></video>
+                    <canvas id="userCanvas"></canvas>
+                </div>
+                <div class="controls">
+                    <button class="btn btn-primary" id="startCamera" onclick="startCamera()">
+                        カメラ開始
+                    </button>
+                    <button class="btn" id="stopCamera" onclick="stopCamera()" disabled>
+                        カメラ停止
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- スコアとフィードバック -->
+    <div class="score-container">
+        <div class="score-panel">
+            <div class="score-display">
+                <div class="score-value" id="scoreValue">--</div>
+                <div class="score-label">スコア</div>
+                <div class="status" id="status">
+                    準備中
+                </div>
+            </div>
+            
+            <div class="feedback-section">
+                <div class="feedback-title">
+                    💡 AIコーチからのアドバイス
+                </div>
+                <div class="feedback-content" id="feedbackContent">
+                    YouTube URLを入力して、カメラを開始すると分析が始まります。
+                    Gemini AIがリアルタイムであなたの動きを分析し、的確なアドバイスを提供します。
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+    
+    <script>
+        // グローバル変数
+        let userPose = null;
+        let userStream = null;
+        let userKeypoints = null;
+        let youtubePlayer = null;
+        let isAnalyzing = false;
+        let geminiApiKey = localStorage.getItem('geminiApiKey') || '';
+        let currentYouTubeUrl = '';
+        
+        // APIキー設定確認
+        if (geminiApiKey) {
+            document.getElementById('apiKeyNotice').style.display = 'none';
+        }
+        
+        // Canvas設定
+        const userVideo = document.getElementById('userVideo');
+        const userCanvas = document.getElementById('userCanvas');
+        const userCtx = userCanvas.getContext('2d');
+        
+        // MediaPipe Pose初期化
+        function initUserPose() {
+            userPose = new Pose({
+                locateFile: (file) => {
+                    return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
+                }
+            });
+            
+            userPose.setOptions({
+                modelComplexity: 1,
+                smoothLandmarks: true,
+                enableSegmentation: false,
+                smoothSegmentation: false,
+                minDetectionConfidence: 0.5,
+                minTrackingConfidence: 0.5
+            });
+            
+            userPose.onResults(onUserResults);
+        }
+        
+        // ユーザーカメラの結果処理
+        function onUserResults(results) {
+            userCanvas.width = userVideo.videoWidth;
+            userCanvas.height = userVideo.videoHeight;
+            
+            userCtx.save();
+            userCtx.clearRect(0, 0, userCanvas.width, userCanvas.height);
+            
+            if (results.poseLandmarks) {
+                // 骨格描画
+                drawConnectors(userCtx, results.poseLandmarks, POSE_CONNECTIONS,
+                    {color: '#00FF00', lineWidth: 3});
+                drawLandmarks(userCtx, results.poseLandmarks,
+                    {color: '#FF0000', lineWidth: 2, radius: 4});
+                
+                userKeypoints = results.poseLandmarks;
+                
+                // Gemini分析（3秒ごと）
+                if (!isAnalyzing && geminiApiKey && currentYouTubeUrl) {
+                    analyzeWithGemini();
+                }
+            }
+            
+            userCtx.restore();
+        }
+        
+        // YouTube動画読み込み
+        function loadYouTubeVideo() {
+            const url = document.getElementById('youtubeUrl').value;
+            if (!url) {
+                alert('YouTube URLを入力してください');
+                return;
+            }
+            
+            // Video ID抽出
+            const videoId = extractVideoId(url);
+            if (!videoId) {
+                alert('有効なYouTube URLを入力してください');
+                return;
+            }
+            
+            currentYouTubeUrl = url;
+            
+            // YouTube Player作成
+            const playerDiv = document.getElementById('youtubePlayer');
+            playerDiv.innerHTML = '';
+            
+            youtubePlayer = new YT.Player('youtubePlayer', {
+                height: '100%',
+                width: '100%',
+                videoId: videoId,
+                playerVars: {
+                    'playsinline': 1,
+                    'controls': 1,
+                    'rel': 0
+                }
+            });
+        }
+        
+        // Video ID抽出
+        function extractVideoId(url) {
+            const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+            return match ? match[1] : null;
+        }
+        
+        // 再生制御
+        function playPauseVideo() {
+            if (youtubePlayer && youtubePlayer.getPlayerState) {
+                const state = youtubePlayer.getPlayerState();
+                if (state === YT.PlayerState.PLAYING) {
+                    youtubePlayer.pauseVideo();
+                } else {
+                    youtubePlayer.playVideo();
+                }
+            }
+        }
+        
+        function setPlaybackSpeed(rate) {
+            if (youtubePlayer && youtubePlayer.setPlaybackRate) {
+                youtubePlayer.setPlaybackRate(rate);
+            }
+        }
+        
+        // カメラ開始
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: 1280, height: 720 }
+                });
+                
+                userVideo.srcObject = stream;
+                userStream = stream;
+                
+                document.getElementById('startCamera').disabled = true;
+                document.getElementById('stopCamera').disabled = false;
+                
+                if (!userPose) {
+                    initUserPose();
+                }
+                
+                // フレーム処理
+                async function sendFrame() {
+                    if (userStream && userPose) {
+                        await userPose.send({image: userVideo});
+                        requestAnimationFrame(sendFrame);
+                    }
+                }
+                sendFrame();
+                
+            } catch (error) {
+                console.error('カメラエラー:', error);
+                alert('カメラへのアクセスに失敗しました');
+            }
+        }
+        
+        // カメラ停止
+        function stopCamera() {
+            if (userStream) {
+                userStream.getTracks().forEach(track => track.stop());
+                userStream = null;
+            }
+            
+            userVideo.srcObject = null;
+            userCtx.clearRect(0, 0, userCanvas.width, userCanvas.height);
+            
+            document.getElementById('startCamera').disabled = false;
+            document.getElementById('stopCamera').disabled = true;
+            
+            userKeypoints = null;
+        }
+        
+        // APIキー設定
+        function setApiKey() {
+            const key = document.getElementById('apiKeyInput').value;
+            if (key) {
+                geminiApiKey = key;
+                localStorage.setItem('geminiApiKey', key);
+                document.getElementById('apiKeyNotice').style.display = 'none';
+                alert('APIキーを設定しました');
+            }
+        }
+        
+        // Gemini分析（シミュレーション）
+        let lastAnalysisTime = 0;
+        async function analyzeWithGemini() {
+            const now = Date.now();
+            if (now - lastAnalysisTime < 3000) return; // 3秒間隔
+            
+            lastAnalysisTime = now;
+            isAnalyzing = true;
+            
+            // ステータス更新
+            document.getElementById('status').innerHTML = '<span class="loading"></span> 分析中...';
+            
+            // シミュレーション用のダミー分析
+            setTimeout(() => {
+                const score = Math.floor(Math.random() * 30) + 70; // 70-100のランダムスコア
+                document.getElementById('scoreValue').textContent = score;
+                
+                const feedbacks = [
+                    `素晴らしい動きです！リズム感が${score >= 85 ? 'とても良い' : '良い'}ですね。腕の動きをもう少し大きくすると、さらに力強い表現になります。`,
+                    `良いパフォーマンスです！${score >= 90 ? '完璧に近い' : 'かなり良い'}タイミングで動けています。膝を少し曲げると、よりダイナミックな動きになりますよ。`,
+                    `${score >= 80 ? 'とても' : ''}いい感じです！音楽との同期が${score >= 85 ? '完璧' : '良好'}です。上半身のアイソレーションを意識すると、プロのような動きに近づきます。`,
+                    `グッドジョブ！${score >= 90 ? '素晴らしい' : '良い'}表現力です。ターンの際に顔の向きも意識すると、より洗練された動きになります。`
+                ];
+                
+                const feedback = feedbacks[Math.floor(Math.random() * feedbacks.length)];
+                document.getElementById('feedbackContent').textContent = feedback;
+                
+                document.getElementById('status').textContent = '分析完了';
+                isAnalyzing = false;
+            }, 1500);
+        }
+        
+        // YouTube API準備完了
+        function onYouTubeIframeAPIReady() {
+            console.log('YouTube API Ready');
+        }
+        
+        // 注意: 実際のGemini API統合には以下のようなコードが必要です
+        /*
+        async function analyzeWithGeminiReal() {
+            const API_KEY = geminiApiKey;
+            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+            
+            // Webカメラ画像を取得
+            const canvas = document.createElement('canvas');
+            canvas.width = userVideo.videoWidth;
+            canvas.height = userVideo.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(userVideo, 0, 0);
+            const imageData = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
+            
+            // Gemini APIリクエスト
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [
+                            {
+                                text: `YouTube動画: ${currentYouTubeUrl}\n時間: ${youtubePlayer.getCurrentTime()}秒\nこの動画の動きとユーザーの動きを比較してアドバイスをください。`
+                            },
+                            {
+                                inline_data: {
+                                    mime_type: "image/jpeg",
+                                    data: imageData
+                                }
+                            }
+                        ]
+                    }]
+                })
+            });
+            
+            const result = await response.json();
+            // 結果を処理して表示
+        }
+        */
+    </script>
+</body>
+</html>

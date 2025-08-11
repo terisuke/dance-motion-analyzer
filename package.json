@@ -1,0 +1,40 @@
+{
+  "name": "dance-motion-analyzer",
+  "version": "1.0.0",
+  "description": "AI-powered dance learning platform",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && uvicorn app.main:app --reload",
+    "build": "cd frontend && npm run build",
+    "test": "npm run test:frontend && npm run test:backend",
+    "test:frontend": "cd frontend && npm test",
+    "test:backend": "cd backend && pytest",
+    "install:all": "npm install && cd frontend && npm install",
+    "docker:up": "docker-compose up",
+    "docker:down": "docker-compose down",
+    "docker:build": "docker-compose build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/dance-motion-analyzer.git"
+  },
+  "keywords": [
+    "dance",
+    "ai",
+    "gemini",
+    "mediapipe",
+    "react",
+    "fastapi"
+  ],
+  "author": "Dance Motion Analyzer Team",
+  "license": "MIT"
+}
