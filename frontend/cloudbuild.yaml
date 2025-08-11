@@ -10,7 +10,7 @@ steps:
       - '--build-arg'
       - 'VITE_API_URL=https://dance-backend-xxxxx-an.a.run.app'
       - '--build-arg'
-      - 'VITE_GEMINI_API_KEY=AIzaSyD2mRqSsY-DMurxjGu8AWt7EZgmy_SzKEs'
+      - 'VITE_GEMINI_API_KEY=${_GEMINI_API_KEY}'
       - '-f'
       - 'Dockerfile.production'
       - '.'

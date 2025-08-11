@@ -7,13 +7,13 @@
 1. **APIキーをコードに直接記述**
 ```javascript
 // ❌ 絶対ダメ
-const API_KEY = "AIzaSyA34R8aibn7f8E3GoIrUR9vrC-Wnf06V_E";
+const API_KEY = "YOUR_ACTUAL_API_KEY_HERE";
 ```
 
 2. **デフォルト値としてAPIキーを設定**
 ```yaml
 # ❌ docker-compose.yml
-- VITE_GEMINI_API_KEY=${VITE_GEMINI_API_KEY:-AIzaSyA...}  # ダメ！
+- VITE_GEMINI_API_KEY=${VITE_GEMINI_API_KEY:-YOUR_KEY_HERE}  # ダメ！
 ```
 
 3. **.envファイルをGitにコミット**
