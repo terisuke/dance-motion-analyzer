@@ -1,5 +1,3 @@
-import type { PoseLandmarkerResult } from '@mediapipe/tasks-vision';
-
 export interface ParsedFeedback {
   score: number | null;
   goodPoint: string;

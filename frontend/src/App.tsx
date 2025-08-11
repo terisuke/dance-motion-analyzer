@@ -60,7 +60,7 @@ function App() {
   const [feedback, setFeedback] = useState<ParsedFeedback | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState('');
-  const [theme, setTheme] = useState<Theme>('dark');
+  const [theme] = useState<Theme>('dark');
   const [currentTime, setCurrentTime] = useState(0);
 
   const playerRef = useRef<YouTubePlayer | null>(null);

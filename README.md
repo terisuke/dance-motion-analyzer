@@ -93,48 +93,64 @@ dance-motion-analyzer/
 
 ## 🚀 クイックスタート
 
-### 1. 環境変数の設定
+### オプション1: Docker Compose（推奨）
 
 ```bash
-# フロントエンドの環境変数をセットアップ
-cp frontend/.env.example frontend/.env.local
-# frontend/.env.localを編集してAPIキーを設定
+# 1. 環境変数ファイルを作成
+cp .env.template .env
 
-# バックエンドの環境変数をセットアップ（必要な場合）
-cp backend/.env.example backend/.env
-# backend/.envを編集してAPIキーを設定
+# 2. .envファイルを編集してGemini APIキーを設定
+# GEMINI_API_KEY=your_gemini_api_key_here
+
+# 3. 全サービスを起動
+docker compose up --build
+
+# サービスが起動したら:
+# - Frontend: http://localhost:3000
+# - Backend API: http://localhost:8000
+# - API Docs: http://localhost:8000/docs
+# - Flower (Celery monitor): http://localhost:5555
 ```
 
-> ⚠️ **重要**: 実際のAPIキーは絶対にGitにコミットしないでください
+### オプション2: ローカル開発
 
-### 2. フロントエンド（既存MVP）
+#### フロントエンド
 
 ```bash
 cd frontend
+
+# 環境変数を設定
+cp .env.example .env.local
+# .env.localを編集してAPIキーを設定
+# VITE_GEMINI_API_KEY=your_gemini_api_key_here
+
+# 依存関係をインストール
 npm install
+
+# 開発サーバーを起動
 npm run dev
 ```
 
-### 3. バックエンド（新規）
+#### バックエンド
 
 ```bash
 cd backend
+
+# Python仮想環境を作成
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# 依存関係をインストール
 pip install -r requirements.txt
+
+# データベースマイグレーション
+alembic upgrade head
+
+# 開発サーバーを起動
 uvicorn app.main:app --reload
 ```
 
-### 4. Docker Compose（オプション）
-
-```bash
-# ルートディレクトリで環境変数を設定
-cp .env.template .env
-# .envを編集してAPIキーとパスワードを設定
-
-# 全サービスを起動
-docker-compose up
-```
+> ⚠️ **重要**: 実際のAPIキーは絶対にGitにコミットしないでください
 
 ## 💡 なぜバックエンドが必要か
 
@@ -179,8 +195,10 @@ docker-compose up
 ### Q1 2025（現在）
 - [x] MVP完成（AI Studio）
 - [x] フロントエンド最適化
-- [ ] バックエンドAPI実装
-- [ ] 認証システム実装
+- [x] バックエンドAPI実装
+- [x] 認証システム実装
+- [x] 0-100点評価システム改善
+- [x] Docker環境構築
 
 ### Q2 2025
 - [ ] データベース設計

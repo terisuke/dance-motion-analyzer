@@ -1,4 +1,4 @@
-import React, {
+import {
   useRef,
   useEffect,
   useState,
@@ -12,7 +12,7 @@ const lerp = (start: number, end: number, amount: number) => {
     return start + (end - start) * amount;
 };
 
-const WebcamView = forwardRef<WebcamViewHandles, {}>((props, ref) => {
+const WebcamView = forwardRef<WebcamViewHandles, {}>((_props, ref) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isLoading, setIsLoading] = useState(true);
