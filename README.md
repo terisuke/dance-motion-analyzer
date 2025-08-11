@@ -10,10 +10,13 @@ Dance Motion Analyzerは、AI Studioで生成されたMVPをベースに、エ�
 - AI Studioによる自動生成
 - クライアントサイド完結
 - Gemini API直接統合
-- **バックエンドAPI実装完了** 🆕
-- **データベースモデル構築完了** 🆕
-- **認証システム実装完了** 🆕
-- **0-100点評価システム改善** 🆕
+- **バックエンドAPI実装完了** ✅
+- **データベースモデル構築完了** ✅
+- **認証システム実装完了** ✅
+- **改善版0-100点評価システム** ✅
+  - リズム感があれば60点以上
+  - PC環境の制約を考慮した採点
+  - モチベーション重視の評価基準
 
 #### Phase 2: Production Ready (現在) 🔄
 - Redisキャッシング実装
@@ -96,13 +99,18 @@ dance-motion-analyzer/
 ### オプション1: Docker Compose（推奨）
 
 ```bash
-# 1. 環境変数ファイルを作成
+# 1. リポジトリをクローン
+git clone https://github.com/yourusername/dance-motion-analyzer.git
+cd dance-motion-analyzer
+
+# 2. 環境変数ファイルを作成
 cp .env.template .env
 
-# 2. .envファイルを編集してGemini APIキーを設定
+# 3. .envファイルを編集してGemini APIキーを設定
+# VITE_GEMINI_API_KEY=your_gemini_api_key_here
 # GEMINI_API_KEY=your_gemini_api_key_here
 
-# 3. 全サービスを起動
+# 4. 全サービスを起動
 docker compose up --build
 
 # サービスが起動したら:
@@ -111,6 +119,8 @@ docker compose up --build
 # - API Docs: http://localhost:8000/docs
 # - Flower (Celery monitor): http://localhost:5555
 ```
+
+> 💡 **初回起動時**: ビルドに数分かかります
 
 ### オプション2: ローカル開発
 
@@ -192,19 +202,24 @@ uvicorn app.main:app --reload
 
 ## 📊 開発ロードマップ
 
-### Q1 2025（現在）
+### Q1 2025（完了）
 - [x] MVP完成（AI Studio）
 - [x] フロントエンド最適化
 - [x] バックエンドAPI実装
+- [x] データベースモデル実装
 - [x] 認証システム実装
 - [x] 0-100点評価システム改善
+  - [x] PC環境考慮の採点
+  - [x] リズム感重視の評価
+  - [x] モチベーション維持の工夫
 - [x] Docker環境構築
+- [x] Redis/Celery統合
 
-### Q2 2025
-- [ ] データベース設計
-- [ ] キャッシング実装
+### Q2 2025（現在）
+- [ ] ユーザー履歴保存機能
 - [ ] ダッシュボード開発
 - [ ] パフォーマンス最適化
+- [ ] プログレストラッキング
 
 ### Q3 2025
 - [ ] マルチテナント対応
@@ -214,11 +229,18 @@ uvicorn app.main:app --reload
 
 ## 🔑 主要機能
 
-### 現在（MVP）
+### 現在実装済み
 - ✅ YouTube URL入力でダンス分析
-- ✅ リアルタイム姿勢推定
-- ✅ Gemini AIフィードバック
-- ✅ シンクロ率スコア表示
+- ✅ リアルタイム姿勢推定（MediaPipe）
+- ✅ 改善版Gemini AIフィードバック
+  - 0-100点の適切な採点
+  - リズム感重視の評価
+  - 短く読みやすいフィードバック
+- ✅ 3秒ごとの自動分析
+- ✅ Docker環境での完全動作
+- ✅ バックエンドAPI（FastAPI）
+- ✅ PostgreSQL + Redis統合
+- ✅ Celeryタスクキュー
 
 ### 実装予定
 - 🔄 ユーザー認証・管理

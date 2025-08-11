@@ -4,8 +4,10 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - VITE_GEMINI_API_KEY=${VITE_GEMINI_API_KEY:-AIzaSyA34R8aibn7f8E3GoIrUR9vrC-Wnf06V_E}
     ports:
-      - "3000:3000"
+      - "3000:80"
     environment:
       - VITE_API_URL=http://localhost:8000
     volumes:
@@ -76,6 +78,7 @@ services:
       - "5555:5555"
     environment:
       - REDIS_URL=redis://redis:6379/0
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
     depends_on:
       - redis
       - celery

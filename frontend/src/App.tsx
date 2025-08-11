@@ -102,6 +102,11 @@ function App() {
       if (frame && youtubeUrl && time > 0) {
         const result = await analyzeMovement(youtubeUrl, time, frame);
         const parsed = parseGeminiFeedback(result);
+        console.log('分析結果:', {
+          時刻: time,
+          スコア: parsed.score,
+          生データ: result.substring(0, 200)
+        });
         setFeedback(parsed);
         if (result.startsWith('フィードバックの生成に失敗しました')) {
              setAnalysisError(result);
@@ -120,7 +125,7 @@ function App() {
         clearInterval(analysisIntervalRef.current);
     }
     if (videoId && !isAnalyzing) {
-        analysisIntervalRef.current = setInterval(performAnalysis, 5000); // 5秒ごとに分析
+        analysisIntervalRef.current = setInterval(performAnalysis, 3000); // 3秒ごとに分析
     }
     return () => {
         if(analysisIntervalRef.current) clearInterval(analysisIntervalRef.current);
