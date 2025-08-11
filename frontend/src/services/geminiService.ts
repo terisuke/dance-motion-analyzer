@@ -14,6 +14,10 @@ export const analyzeMovement = async (
   timestamp: number,
   userFrame: string
 ): Promise<string> => {
+  // ⚠️ 警告: 直接Gemini APIを呼び出しています
+  // Phase 2では apiService.analyzeMovement() を使用してバックエンド経由にする予定
+  console.warn('⚠️ Direct Gemini API call - should use backend API instead (Phase 2)');
+  
   if (!genAI) {
     return "フィードバックの生成に失敗しました。APIキーが設定されていません。";
   }

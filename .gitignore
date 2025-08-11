@@ -41,6 +41,8 @@ build/
 .env.test.local
 .env.production.local
 *.env
+frontend/.env
+backend/.env
 
 # IDE
 .vscode/

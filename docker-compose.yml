@@ -5,7 +5,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - VITE_GEMINI_API_KEY=${VITE_GEMINI_API_KEY:-AIzaSyA34R8aibn7f8E3GoIrUR9vrC-Wnf06V_E}
+        - VITE_GEMINI_API_KEY=${VITE_GEMINI_API_KEY}
     ports:
       - "3000:80"
     environment:
