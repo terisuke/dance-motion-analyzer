@@ -336,9 +336,7 @@ MIT License
 
 ## 🔗 リンク
 
-- [フロントエンドデモ](https://dance-analyzer-frontend.vercel.app)
-- [API ドキュメント](https://api.dance-analyzer.com/docs)
-- [開発者ポータル](https://dev.dance-analyzer.com)
+- [本番環境（Cloud Run）](https://dance-frontend-639959525777.asia-northeast1.run.app)
 
 ---
 
